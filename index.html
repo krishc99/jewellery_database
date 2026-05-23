@@ -378,7 +378,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 const CONFIG = {
   // Paste your Apps Script Web App URL here after deployment
-  API_URL: 'https://script.google.com/macros/s/AKfycbxQ6hu99wt3qeYhBqKDWp_Zn3EpqCCcen2634MNMBq-pSV_VJq63aslzOSqhxnDARLhnA/exec',
+  API_URL: 'YOUR_APPS_SCRIPT_WEB_APP_URL',
 };
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -415,11 +415,17 @@ async function fetchAllProducts() {
 }
 
 async function postTransaction(payload) {
-  const res = await fetch(CONFIG.API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+  // Apps Script blocks CORS preflight on POST — use GET params instead
+  const params = new URLSearchParams({
+    action:      payload.action,
+    sku:         payload.sku,
+    productName: payload.productName,
+    type:        payload.type,
+    quantity:    String(payload.quantity),
+    updatedBy:   payload.updatedBy,
+    notes:       payload.notes || '',
   });
+  const res = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
   if (!res.ok) throw new Error('Network error');
   return res.json();
 }
