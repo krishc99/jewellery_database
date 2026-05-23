@@ -1,6 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/api/proxy",
+      "destination": "https://script.google.com/macros/s/AKfycbxQ6hu99wt3qeYhBqKDWp_Zn3EpqCCcen2634MNMBq-pSV_VJq63aslzOSqhxnDARLhnA/exec"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
