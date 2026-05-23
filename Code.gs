@@ -65,7 +65,6 @@ function rowToProduct(row) {
     imageUrl:     String(row[C.IMAGE_URL-1]     || ""),
     notes:        String(row[C.NOTES-1]         || ""),
   };
-};
 }
 
 function getProduct(sku) {
