@@ -5,361 +5,158 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Inventory — Log Transaction</title>
+<title>Jewellery Inventory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  /* ── Reset & base ─────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --ink:      #0a0a0a;
-    --ink2:     #3a3530;
-    --ink3:     #7a7068;
-    --parchment:#faf7f2;
-    --cream:    #f2ede4;
-    --gold:     #b8860b;
-    --gold-lt:  #d4a520;
-    --gold-dim: #8a6408;
-    --rose:     #c1614a;
-    --teal:     #1a6b5e;
-    --border:   rgba(10,10,10,0.12);
-    --radius:   14px;
-    --ff-serif: 'Cormorant Garamond', Georgia, serif;
-    --ff-mono:  'DM Mono', monospace;
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0a0a0a;--ink2:#3a3530;--ink3:#7a7068;
+  --parchment:#faf7f2;--cream:#f2ede4;
+  --gold:#b8860b;--gold-lt:#d4a520;--gold-dim:#8a6408;
+  --rose:#c1614a;--teal:#1a6b5e;
+  --border:rgba(10,10,10,0.12);--radius:14px;
+  --ff-serif:'Cormorant Garamond',Georgia,serif;
+  --ff-mono:'DM Mono',monospace;
+}
+html,body{height:100%;background:var(--parchment);color:var(--ink);font-family:var(--ff-serif);font-size:16px;-webkit-font-smoothing:antialiased}
 
-  html, body {
-    height: 100%;
-    background: var(--parchment);
-    color: var(--ink);
-    font-family: var(--ff-serif);
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-  }
+/* Shell */
+.shell{min-height:100dvh;max-width:440px;margin:0 auto;display:flex;flex-direction:column;padding:0 0 env(safe-area-inset-bottom,24px)}
 
-  /* ── Layout ───────────────────────────────────────────────── */
-  .shell {
-    min-height: 100dvh;
-    max-width: 440px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    padding: 0 0 env(safe-area-inset-bottom, 20px);
-  }
+/* Header */
+header{padding:20px 20px 16px;border-bottom:1px solid var(--border);background:var(--parchment);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.brand-mark{width:26px;height:26px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold)}
+.brand-name{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink3);font-family:var(--ff-mono)}
+.page-title{font-size:24px;font-weight:600;letter-spacing:-0.01em}
 
-  /* ── Header ───────────────────────────────────────────────── */
-  header {
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--parchment);
-    position: sticky; top: 0; z-index: 10;
-  }
-  .brand {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 4px;
-  }
-  .brand-mark {
-    width: 28px; height: 28px;
-    border: 1.5px solid var(--gold);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; color: var(--gold);
-  }
-  .brand-name {
-    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--ink3); font-family: var(--ff-mono);
-  }
-  .page-title {
-    font-size: 26px; font-weight: 600; line-height: 1.1;
-    letter-spacing: -0.01em;
-  }
+/* Screen */
+.screen{flex:1;padding:20px;animation:fadeUp 0.3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ── Screens ──────────────────────────────────────────────── */
-  .screen { flex: 1; padding: 24px; animation: fadeUp 0.3s ease both; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* ── Product Image ── */
+.product-image-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:var(--radius);overflow:hidden;background:var(--cream);border:1px solid var(--border);margin-bottom:16px;cursor:pointer}
+.product-image-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.product-image-wrap.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink3)}
+.product-image-wrap.empty .img-icon{font-size:36px;opacity:0.4}
+.product-image-wrap.empty .img-label{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase}
+.img-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.55));display:flex;align-items:center;justify-content:flex-end;gap:6px;opacity:0;transition:opacity 0.2s}
+.product-image-wrap:hover .img-overlay{opacity:1}
+.product-image-wrap.empty .img-overlay{opacity:1;background:none;position:relative;margin-top:4px}
+.img-upload-btn{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:5px 12px;cursor:pointer;backdrop-filter:blur(4px)}
+.product-image-wrap.empty .img-upload-btn{color:var(--ink3);background:var(--cream);border-color:var(--border)}
+#photo-input{display:none}
+.uploading-overlay{position:absolute;inset:0;background:rgba(250,247,242,0.85);display:flex;align-items:center;justify-content:center;font-family:var(--ff-mono);font-size:11px;letter-spacing:0.1em;color:var(--gold-dim);display:none}
 
-  /* ── Product card ─────────────────────────────────────────── */
-  .product-card {
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .product-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: linear-gradient(to bottom, var(--gold), var(--gold-dim));
-  }
-  .product-sku {
-    font-family: var(--ff-mono);
-    font-size: 10px; letter-spacing: 0.12em;
-    color: var(--gold-dim); text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .product-name {
-    font-size: 22px; font-weight: 600; line-height: 1.2;
-    margin-bottom: 14px;
-  }
-  .product-meta {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-  }
-  .meta-item { }
-  .meta-label {
-    font-family: var(--ff-mono);
-    font-size: 9px; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--ink3);
-    margin-bottom: 3px;
-  }
-  .meta-value {
-    font-size: 15px; font-weight: 600;
-  }
-  .stock-value { color: var(--ink); }
-  .stock-value.low    { color: var(--rose); }
-  .stock-value.out    { color: var(--rose); }
-  .stock-badge {
-    display: inline-block;
-    font-family: var(--ff-mono); font-size: 9px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 3px 8px; border-radius: 20px;
-    margin-top: 2px;
-  }
-  .stock-badge.ok   { background: #e8f5e9; color: #2e7d32; }
-  .stock-badge.low  { background: #fff3e0; color: #bf6000; }
-  .stock-badge.out  { background: #ffebee; color: #c62828; }
+/* ── Product Details Card ── */
+.product-card{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+.product-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(to bottom,var(--gold),var(--gold-dim))}
+.product-sku{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.12em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:4px}
+.product-name{font-size:22px;font-weight:600;line-height:1.2;margin-bottom:14px}
 
-  /* ── Form ─────────────────────────────────────────────────── */
-  .form-section { margin-bottom: 24px; }
-  .form-label {
-    font-family: var(--ff-mono); font-size: 10px;
-    letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--ink3); display: block; margin-bottom: 10px;
-  }
+/* Details grid */
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.detail-label{font-family:var(--ff-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.detail-value{font-size:16px;font-weight:600;line-height:1.2}
+.detail-value.stock-ok  {color:var(--teal)}
+.detail-value.stock-low {color:#bf6000}
+.detail-value.stock-out {color:var(--rose)}
+.stock-badge{display:inline-block;font-family:var(--ff-mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:20px;margin-top:3px}
+.stock-badge.ok {background:#e8f5e9;color:#2e7d32}
+.stock-badge.low{background:#fff3e0;color:#bf6000}
+.stock-badge.out{background:#ffebee;color:#c62828}
+/* Full width stock item */
+.detail-item.full{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+.detail-item.full .detail-value{font-size:20px}
 
-  /* Toggle: SOLD / ADDED */
-  .type-toggle {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0; border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden;
-  }
-  .type-btn {
-    padding: 14px 0;
-    font-family: var(--ff-mono); font-size: 12px;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    background: transparent; border: none;
-    cursor: pointer; transition: all 0.2s;
-    color: var(--ink3);
-  }
-  .type-btn:first-child { border-right: 1px solid var(--border); }
-  .type-btn.active-sold {
-    background: var(--rose); color: #fff; font-weight: 500;
-  }
-  .type-btn.active-added {
-    background: var(--teal); color: #fff; font-weight: 500;
-  }
-  .type-btn:not(.active-sold):not(.active-added):hover {
-    background: var(--cream);
-  }
+/* ── Form sections ── */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.form-section{margin-bottom:20px}
+.form-label{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:10px}
 
-  /* Qty stepper */
-  .qty-stepper {
-    display: flex; align-items: center;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    overflow: hidden; background: #fff;
-  }
-  .qty-btn {
-    width: 56px; height: 56px; border: none;
-    background: transparent; cursor: pointer;
-    font-size: 22px; color: var(--ink2);
-    transition: background 0.15s;
-    flex-shrink: 0;
-  }
-  .qty-btn:hover { background: var(--cream); }
-  .qty-btn:active { background: var(--border); }
-  .qty-input {
-    flex: 1; text-align: center;
-    border: none; outline: none;
-    font-family: var(--ff-serif); font-size: 32px; font-weight: 600;
-    color: var(--ink); background: transparent;
-    width: 100%;
-  }
-  /* hide browser spinner */
-  .qty-input::-webkit-outer-spin-button,
-  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .qty-input[type=number] { -moz-appearance: textfield; }
+/* Type toggle */
+.type-toggle{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.type-btn{padding:14px 0;font-family:var(--ff-mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;background:transparent;border:none;cursor:pointer;transition:all 0.2s;color:var(--ink3)}
+.type-btn:first-child{border-right:1px solid var(--border)}
+.type-btn.active-sold{background:var(--rose);color:#fff;font-weight:500}
+.type-btn.active-added{background:var(--teal);color:#fff;font-weight:500}
 
-  /* Updated by */
-  .text-input {
-    width: 100%; padding: 14px 16px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: var(--ff-serif); font-size: 17px;
-    background: #fff; color: var(--ink); outline: none;
-    transition: border-color 0.2s;
-  }
-  .text-input:focus { border-color: var(--gold); }
-  .text-input::placeholder { color: var(--ink3); font-style: italic; }
+/* Qty stepper */
+.qty-stepper{display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fff}
+.qty-btn{width:56px;height:56px;border:none;background:transparent;cursor:pointer;font-size:22px;color:var(--ink2);transition:background 0.15s;flex-shrink:0}
+.qty-btn:hover{background:var(--cream)}
+.qty-input{flex:1;text-align:center;border:none;outline:none;font-family:var(--ff-serif);font-size:32px;font-weight:600;color:var(--ink);background:transparent;width:100%}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.qty-input[type=number]{-moz-appearance:textfield}
 
-  /* Notes */
-  .textarea-input {
-    width: 100%; padding: 14px 16px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: var(--ff-serif); font-size: 16px;
-    background: #fff; color: var(--ink); outline: none;
-    resize: none; min-height: 80px;
-    transition: border-color 0.2s;
-  }
-  .textarea-input:focus { border-color: var(--gold); }
-  .textarea-input::placeholder { color: var(--ink3); font-style: italic; }
+/* Text inputs */
+.text-input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--ff-serif);font-size:17px;background:#fff;color:var(--ink);outline:none;transition:border-color 0.2s}
+.text-input:focus{border-color:var(--gold)}
+.text-input::placeholder{color:var(--ink3);font-style:italic}
+.textarea-input{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--ff-serif);font-size:16px;background:#fff;color:var(--ink);outline:none;resize:none;min-height:72px;transition:border-color 0.2s}
+.textarea-input:focus{border-color:var(--gold)}
+.textarea-input::placeholder{color:var(--ink3);font-style:italic}
 
-  /* ── Submit btn ───────────────────────────────────────────── */
-  .submit-btn {
-    width: 100%; padding: 18px;
-    background: var(--ink); color: var(--parchment);
-    border: none; border-radius: var(--radius);
-    font-family: var(--ff-mono); font-size: 12px;
-    letter-spacing: 0.16em; text-transform: uppercase;
-    cursor: pointer; transition: all 0.2s;
-    position: relative; overflow: hidden;
-  }
-  .submit-btn:hover { background: var(--ink2); }
-  .submit-btn:active { transform: scale(0.99); }
-  .submit-btn:disabled { background: var(--ink3); cursor: not-allowed; }
-  .submit-btn.loading::after {
-    content: '';
-    position: absolute; top: 50%; left: 50%;
-    width: 18px; height: 18px; margin: -9px 0 0 -9px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* Submit */
+.submit-btn{width:100%;padding:18px;background:var(--ink);color:var(--parchment);border:none;border-radius:var(--radius);font-family:var(--ff-mono);font-size:12px;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.submit-btn:hover{background:var(--ink2)}
+.submit-btn:disabled{background:var(--ink3);cursor:not-allowed}
+.submit-btn.loading .btn-text{opacity:0}
+.submit-btn.loading::after{content:'';position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── States ───────────────────────────────────────────────── */
-  /* Loading skeleton */
-  .skeleton {
-    background: linear-gradient(90deg, var(--cream) 25%, var(--border) 50%, var(--cream) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 6px;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
+/* Error */
+.error-msg{background:#fff0ef;border:1px solid #f5c6c0;border-radius:var(--radius);padding:12px 16px;color:var(--rose);font-size:14px;margin-bottom:16px;display:none}
+.error-msg.visible{display:block}
 
-  /* Success screen */
-  .success-screen {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 40px 24px; text-align: center;
-    animation: fadeUp 0.4s ease both;
-  }
-  .success-icon {
-    width: 72px; height: 72px; border-radius: 50%;
-    border: 2px solid var(--teal);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; color: var(--teal); margin-bottom: 20px;
-    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.1s;
-  }
-  @keyframes popIn {
-    from { transform: scale(0.5); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  .success-title { font-size: 30px; font-weight: 600; margin-bottom: 8px; }
-  .success-sub { color: var(--ink3); font-size: 16px; font-style: italic; margin-bottom: 32px; }
-  .success-summary {
-    width: 100%; background: var(--cream);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px; text-align: left; margin-bottom: 28px;
-  }
-  .summary-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 7px 0; border-bottom: 1px solid var(--border);
-    font-size: 15px;
-  }
-  .summary-row:last-child { border-bottom: none; }
-  .summary-key { color: var(--ink3); font-family: var(--ff-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
-  .summary-val { font-weight: 600; }
-  .sold-val  { color: var(--rose); }
-  .added-val { color: var(--teal); }
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}
+@keyframes shimmer{to{background-position:-200% 0}}
 
-  .again-btn {
-    width: 100%; padding: 16px;
-    background: transparent; color: var(--ink);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: var(--ff-mono); font-size: 11px;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    cursor: pointer; transition: background 0.2s;
-    margin-bottom: 12px;
-  }
-  .again-btn:hover { background: var(--cream); }
+/* Success */
+.success-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;animation:fadeUp 0.4s ease both}
+.success-icon{width:72px;height:72px;border-radius:50%;border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--teal);margin-bottom:20px;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both 0.1s}
+@keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-size:30px;font-weight:600;margin-bottom:8px}
+.success-sub{color:var(--ink3);font-size:16px;font-style:italic;margin-bottom:28px}
+.success-summary{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:left;margin-bottom:24px}
+.summary-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:15px}
+.summary-row:last-child{border-bottom:none}
+.summary-key{color:var(--ink3);font-family:var(--ff-mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase}
+.summary-val{font-weight:600}
+.sold-val{color:var(--rose)}
+.added-val{color:var(--teal)}
+.again-btn{width:100%;padding:15px;background:transparent;color:var(--ink);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--ff-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s}
+.again-btn:hover{background:var(--cream)}
 
-  /* Error */
-  .error-msg {
-    background: #fff0ef; border: 1px solid #f5c6c0;
-    border-radius: var(--radius); padding: 14px 16px;
-    color: var(--rose); font-size: 14px; margin-bottom: 16px;
-    display: none;
-  }
-  .error-msg.visible { display: block; }
+/* Search */
+.search-screen{flex:1;padding:20px;animation:fadeUp 0.3s ease both}
+.search-sub{color:var(--ink3);font-style:italic;margin-bottom:20px;font-size:15px}
+.search-wrap{position:relative;margin-bottom:14px}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;font-size:18px}
+.search-input{width:100%;padding:14px 16px 14px 44px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--ff-serif);font-size:16px;background:#fff;color:var(--ink);outline:none;transition:border-color 0.2s}
+.search-input:focus{border-color:var(--gold)}
+.sku-list{list-style:none}
+.sku-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;background:#fff;transition:all 0.15s}
+.sku-item:hover{background:var(--cream);border-color:var(--gold)}
+.sku-item-name{font-size:16px;font-weight:600;margin-bottom:2px}
+.sku-item-sku{font-family:var(--ff-mono);font-size:10px;color:var(--gold-dim);letter-spacing:0.08em}
+.sku-item-stock{font-family:var(--ff-mono);font-size:11px;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.sku-item-stock.ok{background:#e8f5e9;color:#2e7d32}
+.sku-item-stock.low{background:#fff3e0;color:#bf6000}
+.sku-item-stock.out{background:#ffebee;color:#c62828}
 
-  /* Not found */
-  .not-found {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 40px 24px; text-align: center;
-  }
-  .not-found-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
-  .not-found-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-  .not-found-sub { color: var(--ink3); font-style: italic; }
-
-  /* ── Manual SKU search (no QR param) ─────────────────────── */
-  .search-screen { flex: 1; padding: 24px; animation: fadeUp 0.3s ease both; }
-  .search-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-  .search-sub { color: var(--ink3); font-style: italic; margin-bottom: 24px; font-size: 15px; }
-  .search-wrap { position: relative; margin-bottom: 16px; }
-  .search-input {
-    width: 100%; padding: 14px 16px 14px 44px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: var(--ff-serif); font-size: 16px;
-    background: #fff; color: var(--ink); outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-input:focus { border-color: var(--gold); }
-  .search-icon {
-    position: absolute; left: 14px; top: 50%;
-    transform: translateY(-50%); color: var(--ink3);
-    pointer-events: none; font-size: 18px;
-  }
-  .sku-list { list-style: none; }
-  .sku-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    margin-bottom: 8px; cursor: pointer;
-    background: #fff; transition: all 0.15s;
-  }
-  .sku-item:hover { background: var(--cream); border-color: var(--gold); }
-  .sku-item-left {}
-  .sku-item-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
-  .sku-item-sku  { font-family: var(--ff-mono); font-size: 10px; color: var(--gold-dim); letter-spacing: 0.08em; }
-  .sku-item-stock {
-    font-family: var(--ff-mono); font-size: 11px;
-    padding: 4px 10px; border-radius: 20px;
-  }
-  .sku-item-stock.ok  { background: #e8f5e9; color: #2e7d32; }
-  .sku-item-stock.low { background: #fff3e0; color: #bf6000; }
-  .sku-item-stock.out { background: #ffebee; color: #c62828; }
+/* Not found */
+.not-found{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+.not-found-icon{font-size:48px;margin-bottom:16px;opacity:0.35}
+.not-found-title{font-size:24px;font-weight:600;margin-bottom:8px}
+.not-found-sub{color:var(--ink3);font-style:italic}
 </style>
 </head>
 <body>
 <div class="shell" id="shell">
-
   <header>
     <div class="brand">
       <div class="brand-mark">✦</div>
@@ -367,136 +164,170 @@
     </div>
     <h1 class="page-title" id="page-title">Log Transaction</h1>
   </header>
-
   <div id="app"></div>
-
 </div>
+<input type="file" id="photo-input" accept="image/*" capture="environment">
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────
-// CONFIG — replace with your values after deploying Apps Script
-// ─────────────────────────────────────────────────────────────────────────
-const CONFIG = {
-  // Paste your Apps Script Web App URL here after deployment
-  API_URL: '/api/proxy',  // Vercel proxy → Apps Script (avoids CORS)
-};
+const CONFIG = { API_URL: '/api/proxy' };
 
-// ─────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────
 let state = {
   product: null,
   txnType: 'SOLD',
   qty: 1,
-  updatedBy: '',
+  updatedBy: localStorage.getItem('lastUser') || '',
   notes: '',
-  view: 'loading', // loading | search | form | success | error
 };
 
-// ─────────────────────────────────────────────────────────────────────────
-// ROUTER — read ?sku= param from URL
-// ─────────────────────────────────────────────────────────────────────────
-const params = new URLSearchParams(location.search);
-const SKU_PARAM = params.get('sku') || params.get('SKU') || params.get('s') || '';
+const urlParams = new URLSearchParams(location.search);
+const SKU_PARAM = urlParams.get('sku') || urlParams.get('SKU') || urlParams.get('s') || '';
+let allProducts = [];
 
-// ─────────────────────────────────────────────────────────────────────────
-// API CALLS
-// ─────────────────────────────────────────────────────────────────────────
+// ── API ──────────────────────────────────────────────────────
 async function fetchProduct(sku) {
   const res = await fetch(`${CONFIG.API_URL}?action=getProduct&sku=${encodeURIComponent(sku)}`);
   if (!res.ok) throw new Error('Network error');
   return res.json();
 }
-
 async function fetchAllProducts() {
   const res = await fetch(`${CONFIG.API_URL}?action=getAllProducts`);
   if (!res.ok) throw new Error('Network error');
   return res.json();
 }
-
 async function postTransaction(payload) {
-  // Apps Script blocks CORS preflight on POST — use GET params instead
   const params = new URLSearchParams({
-    action:      payload.action,
-    sku:         payload.sku,
-    productName: payload.productName,
-    type:        payload.type,
-    quantity:    String(payload.quantity),
-    updatedBy:   payload.updatedBy,
-    notes:       payload.notes || '',
+    action: payload.action, sku: payload.sku,
+    productName: payload.productName, type: payload.type,
+    quantity: String(payload.quantity), updatedBy: payload.updatedBy,
+    notes: payload.notes || '',
   });
   const res = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
   if (!res.ok) throw new Error('Network error');
   return res.json();
 }
+async function uploadPhoto(sku, base64) {
+  const params = new URLSearchParams({ action: 'uploadPhoto', sku, imageBase64: base64 });
+  const res = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
+  if (!res.ok) throw new Error('Upload failed');
+  return res.json();
+}
 
-// ─────────────────────────────────────────────────────────────────────────
-// RENDER HELPERS
-// ─────────────────────────────────────────────────────────────────────────
-function stockClass(stock, target) {
+// ── Helpers ──────────────────────────────────────────────────
+function sc(stock, target) {
   if (stock <= 0) return 'out';
   if (stock <= target) return 'low';
   return 'ok';
 }
-function stockLabel(stock, target) {
+function sl(stock, target) {
   if (stock <= 0) return 'Out of stock';
   if (stock <= target) return 'Low stock';
   return 'In stock';
 }
+function compressImage(file, maxW = 800) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82).split(',')[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
-// ─────────────────────────────────────────────────────────────────────────
-// VIEWS
-// ─────────────────────────────────────────────────────────────────────────
-
+// ── Views ─────────────────────────────────────────────────────
 function renderLoading() {
   document.getElementById('app').innerHTML = `
     <div class="screen">
+      <div class="skeleton" style="width:100%;aspect-ratio:1/1;border-radius:14px;margin-bottom:16px"></div>
       <div class="product-card">
-        <div class="skeleton" style="width:120px;height:12px;margin-bottom:10px"></div>
-        <div class="skeleton" style="width:200px;height:26px;margin-bottom:16px"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div class="skeleton" style="height:40px"></div>
-          <div class="skeleton" style="height:40px"></div>
-          <div class="skeleton" style="height:40px"></div>
+        <div class="skeleton" style="width:120px;height:11px;margin-bottom:8px"></div>
+        <div class="skeleton" style="width:200px;height:24px;margin-bottom:14px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="skeleton" style="height:56px;border-radius:10px"></div>
+          <div class="skeleton" style="height:56px;border-radius:10px"></div>
+          <div class="skeleton" style="height:56px;border-radius:10px"></div>
+          <div class="skeleton" style="height:56px;border-radius:10px"></div>
         </div>
       </div>
-      <div class="skeleton" style="height:52px;margin-bottom:20px"></div>
-      <div class="skeleton" style="height:56px;margin-bottom:20px"></div>
     </div>`;
 }
 
 function renderForm(product) {
-  const sc = stockClass(product.currentStock, product.target);
-  const app = document.getElementById('app');
-  app.innerHTML = `
+  document.getElementById('page-title').textContent = 'Log Transaction';
+  const cls = sc(product.currentStock, product.target);
+  const hasImage = !!product.imageUrl;
+
+  document.getElementById('app').innerHTML = `
     <div class="screen">
+
+      <!-- Product image -->
+      <div class="product-image-wrap ${hasImage ? '' : 'empty'}" id="img-wrap" onclick="triggerPhotoUpload()">
+        ${hasImage
+          ? `<img src="${product.imageUrl}" alt="${product.name}" id="product-img">`
+          : `<div class="img-icon">◇</div><div class="img-label">Tap to add photo</div>`}
+        <div class="img-overlay">
+          <span class="img-upload-btn">${hasImage ? '↺ Change photo' : 'Upload photo'}</span>
+        </div>
+        <div class="uploading-overlay" id="upload-overlay">Uploading…</div>
+      </div>
+
+      <!-- Product details -->
       <div class="product-card">
         <div class="product-sku">${product.sku}</div>
         <div class="product-name">${product.name}</div>
-        <div class="product-meta">
-          <div class="meta-item">
-            <div class="meta-label">Current stock</div>
-            <div class="meta-value stock-value ${sc}">${product.currentStock}</div>
-            <span class="stock-badge ${sc}">${stockLabel(product.currentStock, product.target)}</span>
+        <div class="details-grid">
+          <div class="detail-item full">
+            <div>
+              <div class="detail-label">Current Stock</div>
+              <div class="detail-value stock-${cls}">${product.currentStock} units</div>
+            </div>
+            <span class="stock-badge ${cls}">${sl(product.currentStock, product.target)}</span>
           </div>
-          <div class="meta-item">
-            <div class="meta-label">Category</div>
-            <div class="meta-value">${product.subcategory}</div>
+          <div class="detail-item">
+            <div class="detail-label">Category</div>
+            <div class="detail-value">${product.category || '—'}</div>
           </div>
-          <div class="meta-item">
-            <div class="meta-label">Metal</div>
-            <div class="meta-value">${product.metal}</div>
+          <div class="detail-item">
+            <div class="detail-label">Source</div>
+            <div class="detail-value">${product.source || '—'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Gross Weight</div>
+            <div class="detail-value">${product.grossWeight || '—'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Net Weight</div>
+            <div class="detail-value">${product.netWeight || '—'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Making Cost</div>
+            <div class="detail-value">${product.makingCost ? '₹' + product.makingCost : '—'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Selling Cost</div>
+            <div class="detail-value">${product.sellingCost ? '₹' + product.sellingCost : '—'}</div>
           </div>
         </div>
       </div>
 
+      <div class="divider"></div>
+
+      <!-- Transaction form -->
       <div class="error-msg" id="error-msg"></div>
 
       <div class="form-section">
-        <label class="form-label">Transaction type</label>
+        <label class="form-label">Transaction Type</label>
         <div class="type-toggle">
-          <button class="type-btn ${state.txnType==='SOLD'?'active-sold':''}" id="btn-sold" onclick="setType('SOLD')">Sold</button>
-          <button class="type-btn ${state.txnType==='ADDED'?'active-added':''}" id="btn-added" onclick="setType('ADDED')">Added</button>
+          <button class="type-btn ${state.txnType==='SOLD'?'active-sold':''}" id="btn-sold" onclick="setType('SOLD')">− Sold</button>
+          <button class="type-btn ${state.txnType==='ADDED'?'active-added':''}" id="btn-added" onclick="setType('ADDED')">+ Added</button>
         </div>
       </div>
 
@@ -504,36 +335,38 @@ function renderForm(product) {
         <label class="form-label">Quantity</label>
         <div class="qty-stepper">
           <button class="qty-btn" onclick="adjustQty(-1)">−</button>
-          <input class="qty-input" id="qty-input" type="number" min="1" value="${state.qty}" oninput="state.qty=Math.max(1,parseInt(this.value)||1);this.value=state.qty">
+          <input class="qty-input" id="qty-input" type="number" min="1" value="${state.qty}"
+            oninput="state.qty=Math.max(1,parseInt(this.value)||1);this.value=state.qty">
           <button class="qty-btn" onclick="adjustQty(1)">+</button>
         </div>
       </div>
 
       <div class="form-section">
-        <label class="form-label">Updated by</label>
+        <label class="form-label">Updated By</label>
         <input class="text-input" id="updated-by" type="text" placeholder="Your name…"
           value="${state.updatedBy}" oninput="state.updatedBy=this.value">
       </div>
 
       <div class="form-section">
-        <label class="form-label">Notes <span style="opacity:0.5">(optional)</span></label>
-        <textarea class="textarea-input" id="notes" placeholder="e.g. Restock from supplier…"
+        <label class="form-label">Notes <span style="opacity:0.45">(optional)</span></label>
+        <textarea class="textarea-input" id="notes"
+          placeholder="e.g. Restock from supplier…"
           oninput="state.notes=this.value">${state.notes}</textarea>
       </div>
 
       <button class="submit-btn" id="submit-btn" onclick="submitTransaction()">
-        Record Transaction
+        <span class="btn-text">Record Transaction</span>
       </button>
     </div>`;
+
+  // Wire up photo input
+  document.getElementById('photo-input').onchange = handlePhotoSelected;
 }
 
 function renderSuccess(product, txnType, qty) {
   const verb = txnType === 'SOLD' ? 'Sold' : 'Added';
   const valClass = txnType === 'SOLD' ? 'sold-val' : 'added-val';
-  const newStock = txnType === 'SOLD'
-    ? product.currentStock - qty
-    : product.currentStock + qty;
-
+  const newStock = txnType === 'SOLD' ? product.currentStock - qty : product.currentStock + qty;
   document.getElementById('app').innerHTML = `
     <div class="success-screen">
       <div class="success-icon">✓</div>
@@ -553,7 +386,7 @@ function renderSuccess(product, txnType, qty) {
           <span class="summary-val">${qty}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-key">New stock</span>
+          <span class="summary-key">New Stock</span>
           <span class="summary-val">${newStock} units</span>
         </div>
         <div class="summary-row">
@@ -566,54 +399,40 @@ function renderSuccess(product, txnType, qty) {
 }
 
 function renderSearch(products) {
-  const app = document.getElementById('app');
   document.getElementById('page-title').textContent = 'Select Product';
-  app.innerHTML = `
+  document.getElementById('app').innerHTML = `
     <div class="search-screen">
-      <p class="search-sub">No SKU scanned — search or tap a product below</p>
+      <p class="search-sub">Search or tap a product to log a transaction</p>
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
         <input class="search-input" id="search-input" type="text"
-          placeholder="Search by name or SKU…" oninput="filterProducts(this.value)">
+          placeholder="Search by name or SKU…" oninput="filterProducts(this.value)" autofocus>
       </div>
-      <ul class="sku-list" id="sku-list">
-        ${renderSkuList(products)}
-      </ul>
+      <ul class="sku-list" id="sku-list">${buildSkuList(products)}</ul>
     </div>`;
 }
 
-function renderSkuList(products) {
+function buildSkuList(products) {
   return products.map(p => {
-    const sc = stockClass(p.currentStock, p.target);
+    const cls = sc(p.currentStock, p.target);
     return `<li class="sku-item" onclick="selectProduct('${p.sku}')">
-      <div class="sku-item-left">
+      <div>
         <div class="sku-item-name">${p.name}</div>
         <div class="sku-item-sku">${p.sku}</div>
       </div>
-      <span class="sku-item-stock ${sc}">${p.currentStock} units</span>
+      <span class="sku-item-stock ${cls}">${p.currentStock} units</span>
     </li>`;
   }).join('');
 }
 
-let allProducts = [];
 function filterProducts(q) {
-  const filtered = q
-    ? allProducts.filter(p =>
-        p.name.toLowerCase().includes(q.toLowerCase()) ||
-        p.sku.toLowerCase().includes(q.toLowerCase()))
-    : allProducts;
-  document.getElementById('sku-list').innerHTML = renderSkuList(filtered);
+  const f = q ? allProducts.filter(p =>
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    p.sku.toLowerCase().includes(q.toLowerCase())) : allProducts;
+  document.getElementById('sku-list').innerHTML = buildSkuList(f);
 }
 
-function selectProduct(sku) {
-  document.getElementById('page-title').textContent = 'Log Transaction';
-  state.product = allProducts.find(p => p.sku === sku);
-  renderForm(state.product);
-}
-
-// ─────────────────────────────────────────────────────────────────────────
-// ACTIONS
-// ─────────────────────────────────────────────────────────────────────────
+// ── Actions ──────────────────────────────────────────────────
 function setType(type) {
   state.txnType = type;
   document.getElementById('btn-sold').className  = 'type-btn' + (type==='SOLD'  ? ' active-sold'  : '');
@@ -625,14 +444,44 @@ function adjustQty(delta) {
   document.getElementById('qty-input').value = state.qty;
 }
 
+function triggerPhotoUpload() {
+  document.getElementById('photo-input').click();
+}
+
+async function handlePhotoSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const wrap = document.getElementById('img-wrap');
+  const overlay = document.getElementById('upload-overlay');
+  overlay.style.display = 'flex';
+  try {
+    const base64 = await compressImage(file);
+    const result = await uploadPhoto(state.product.sku, base64);
+    if (result.imageUrl) {
+      state.product.imageUrl = result.imageUrl;
+      wrap.classList.remove('empty');
+      wrap.innerHTML = `
+        <img src="${result.imageUrl}" alt="${state.product.name}" id="product-img">
+        <div class="img-overlay"><span class="img-upload-btn">↺ Change photo</span></div>
+        <div class="uploading-overlay" id="upload-overlay" style="display:none">Uploading…</div>`;
+      wrap.onclick = triggerPhotoUpload;
+      document.getElementById('photo-input').onchange = handlePhotoSelected;
+    }
+  } catch(err) {
+    overlay.style.display = 'none';
+    alert('Photo upload failed. Check your connection.');
+  }
+  e.target.value = '';
+}
+
 async function submitTransaction() {
   const btn = document.getElementById('submit-btn');
   const errEl = document.getElementById('error-msg');
   errEl.classList.remove('visible');
 
   state.updatedBy = document.getElementById('updated-by').value.trim();
-  state.notes = document.getElementById('notes').value.trim();
-  state.qty = parseInt(document.getElementById('qty-input').value) || 1;
+  state.notes     = document.getElementById('notes').value.trim();
+  state.qty       = parseInt(document.getElementById('qty-input').value) || 1;
 
   if (!state.updatedBy) {
     errEl.textContent = 'Please enter your name before submitting.';
@@ -648,10 +497,10 @@ async function submitTransaction() {
 
   btn.disabled = true;
   btn.classList.add('loading');
-  btn.textContent = '';
+  localStorage.setItem('lastUser', state.updatedBy);
 
   try {
-    const payload = {
+    const result = await postTransaction({
       action: 'addTransaction',
       sku: state.product.sku,
       productName: state.product.name,
@@ -659,33 +508,29 @@ async function submitTransaction() {
       quantity: state.qty,
       updatedBy: state.updatedBy,
       notes: state.notes,
-    };
-    const result = await postTransaction(payload);
+    });
     if (result.status !== 'ok') throw new Error(result.message || 'Unknown error');
     renderSuccess(state.product, state.txnType, state.qty);
-  } catch (err) {
+  } catch(err) {
     btn.disabled = false;
     btn.classList.remove('loading');
-    btn.textContent = 'Record Transaction';
     errEl.textContent = 'Failed to save. Check your connection and try again.';
     errEl.classList.add('visible');
   }
 }
 
 function resetForm() {
-  state.qty = 1;
-  state.notes = '';
-  document.getElementById('page-title').textContent = 'Log Transaction';
-  if (SKU_PARAM && state.product) {
-    renderForm(state.product);
-  } else {
-    renderSearch(allProducts);
-  }
+  state.qty = 1; state.notes = '';
+  if (SKU_PARAM && state.product) renderForm(state.product);
+  else renderSearch(allProducts);
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────────────
+function selectProduct(sku) {
+  state.product = allProducts.find(p => p.sku === sku);
+  renderForm(state.product);
+}
+
+// ── Init ─────────────────────────────────────────────────────
 async function init() {
   renderLoading();
   try {
@@ -696,27 +541,25 @@ async function init() {
           <div class="not-found">
             <div class="not-found-icon">◇</div>
             <div class="not-found-title">SKU not found</div>
-            <div class="not-found-sub">${SKU_PARAM}<br>Check the label and try again</div>
+            <div class="not-found-sub">${SKU_PARAM}</div>
           </div>`;
         return;
       }
       state.product = product;
       renderForm(product);
     } else {
-      // No SKU param — show searchable product list
       allProducts = await fetchAllProducts();
       renderSearch(allProducts);
     }
-  } catch (err) {
+  } catch(err) {
     document.getElementById('app').innerHTML = `
       <div class="not-found">
         <div class="not-found-icon">⚠</div>
         <div class="not-found-title">Could not load</div>
-        <div class="not-found-sub">Check your connection<br>or API configuration</div>
+        <div class="not-found-sub">Check your connection</div>
       </div>`;
   }
 }
-
 init();
 </script>
 </body>
