@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Inventory — Log Transaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink:      #0a0a0a;
+    --ink2:     #3a3530;
+    --ink3:     #7a7068;
+    --parchment:#faf7f2;
+    --cream:    #f2ede4;
+    --gold:     #b8860b;
+    --gold-lt:  #d4a520;
+    --gold-dim: #8a6408;
+    --rose:     #c1614a;
+    --teal:     #1a6b5e;
+    --border:   rgba(10,10,10,0.12);
+    --radius:   14px;
+    --ff-serif: 'Cormorant Garamond', Georgia, serif;
+    --ff-mono:  'DM Mono', monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: var(--ff-serif);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ───────────────────────────────────────────────── */
+  .shell {
+    min-height: 100dvh;
+    max-width: 440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 env(safe-area-inset-bottom, 20px);
+  }
+
+  /* ── Header ───────────────────────────────────────────────── */
+  header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--parchment);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--gold);
+  }
+  .brand-name {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink3); font-family: var(--ff-mono);
+  }
+  .page-title {
+    font-size: 26px; font-weight: 600; line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Screens ──────────────────────────────────────────────── */
+  .screen { flex: 1; padding: 24px; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Product card ─────────────────────────────────────────── */
+  .product-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .product-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(to bottom, var(--gold), var(--gold-dim));
+  }
+  .product-sku {
+    font-family: var(--ff-mono);
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--gold-dim); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .product-name {
+    font-size: 22px; font-weight: 600; line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .product-meta {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .meta-item { }
+  .meta-label {
+    font-family: var(--ff-mono);
+    font-size: 9px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink3);
+    margin-bottom: 3px;
+  }
+  .meta-value {
+    font-size: 15px; font-weight: 600;
+  }
+  .stock-value { color: var(--ink); }
+  .stock-value.low    { color: var(--rose); }
+  .stock-value.out    { color: var(--rose); }
+  .stock-badge {
+    display: inline-block;
+    font-family: var(--ff-mono); font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px;
+    margin-top: 2px;
+  }
+  .stock-badge.ok   { background: #e8f5e9; color: #2e7d32; }
+  .stock-badge.low  { background: #fff3e0; color: #bf6000; }
+  .stock-badge.out  { background: #ffebee; color: #c62828; }
+
+  /* ── Form ─────────────────────────────────────────────────── */
+  .form-section { margin-bottom: 24px; }
+  .form-label {
+    font-family: var(--ff-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink3); display: block; margin-bottom: 10px;
+  }
+
+  /* Toggle: SOLD / ADDED */
+  .type-toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .type-btn {
+    padding: 14px 0;
+    font-family: var(--ff-mono); font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: transparent; border: none;
+    cursor: pointer; transition: all 0.2s;
+    color: var(--ink3);
+  }
+  .type-btn:first-child { border-right: 1px solid var(--border); }
+  .type-btn.active-sold {
+    background: var(--rose); color: #fff; font-weight: 500;
+  }
+  .type-btn.active-added {
+    background: var(--teal); color: #fff; font-weight: 500;
+  }
+  .type-btn:not(.active-sold):not(.active-added):hover {
+    background: var(--cream);
+  }
+
+  /* Qty stepper */
+  .qty-stepper {
+    display: flex; align-items: center;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; background: #fff;
+  }
+  .qty-btn {
+    width: 56px; height: 56px; border: none;
+    background: transparent; cursor: pointer;
+    font-size: 22px; color: var(--ink2);
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .qty-btn:hover { background: var(--cream); }
+  .qty-btn:active { background: var(--border); }
+  .qty-input {
+    flex: 1; text-align: center;
+    border: none; outline: none;
+    font-family: var(--ff-serif); font-size: 32px; font-weight: 600;
+    color: var(--ink); background: transparent;
+    width: 100%;
+  }
+  /* hide browser spinner */
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .qty-input[type=number] { -moz-appearance: textfield; }
+
+  /* Updated by */
+  .text-input {
+    width: 100%; padding: 14px 16px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--ff-serif); font-size: 17px;
+    background: #fff; color: var(--ink); outline: none;
+    transition: border-color 0.2s;
+  }
+  .text-input:focus { border-color: var(--gold); }
+  .text-input::placeholder { color: var(--ink3); font-style: italic; }
+
+  /* Notes */
+  .textarea-input {
+    width: 100%; padding: 14px 16px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--ff-serif); font-size: 16px;
+    background: #fff; color: var(--ink); outline: none;
+    resize: none; min-height: 80px;
+    transition: border-color 0.2s;
+  }
+  .textarea-input:focus { border-color: var(--gold); }
+  .textarea-input::placeholder { color: var(--ink3); font-style: italic; }
+
+  /* ── Submit btn ───────────────────────────────────────────── */
+  .submit-btn {
+    width: 100%; padding: 18px;
+    background: var(--ink); color: var(--parchment);
+    border: none; border-radius: var(--radius);
+    font-family: var(--ff-mono); font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .submit-btn:hover { background: var(--ink2); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: var(--ink3); cursor: not-allowed; }
+  .submit-btn.loading::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 18px; height: 18px; margin: -9px 0 0 -9px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── States ───────────────────────────────────────────────── */
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--cream) 25%, var(--border) 50%, var(--cream) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* Success screen */
+  .success-screen {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center;
+    animation: fadeUp 0.4s ease both;
+  }
+  .success-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 2px solid var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: var(--teal); margin-bottom: 20px;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.1s;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .success-title { font-size: 30px; font-weight: 600; margin-bottom: 8px; }
+  .success-sub { color: var(--ink3); font-size: 16px; font-style: italic; margin-bottom: 32px; }
+  .success-summary {
+    width: 100%; background: var(--cream);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; text-align: left; margin-bottom: 28px;
+  }
+  .summary-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid var(--border);
+    font-size: 15px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-key { color: var(--ink3); font-family: var(--ff-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .summary-val { font-weight: 600; }
+  .sold-val  { color: var(--rose); }
+  .added-val { color: var(--teal); }
+
+  .again-btn {
+    width: 100%; padding: 16px;
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--ff-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+    margin-bottom: 12px;
+  }
+  .again-btn:hover { background: var(--cream); }
+
+  /* Error */
+  .error-msg {
+    background: #fff0ef; border: 1px solid #f5c6c0;
+    border-radius: var(--radius); padding: 14px 16px;
+    color: var(--rose); font-size: 14px; margin-bottom: 16px;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* Not found */
+  .not-found {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center;
+  }
+  .not-found-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .not-found-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .not-found-sub { color: var(--ink3); font-style: italic; }
+
+  /* ── Manual SKU search (no QR param) ─────────────────────── */
+  .search-screen { flex: 1; padding: 24px; animation: fadeUp 0.3s ease both; }
+  .search-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .search-sub { color: var(--ink3); font-style: italic; margin-bottom: 24px; font-size: 15px; }
+  .search-wrap { position: relative; margin-bottom: 16px; }
+  .search-input {
+    width: 100%; padding: 14px 16px 14px 44px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--ff-serif); font-size: 16px;
+    background: #fff; color: var(--ink); outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--gold); }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--ink3);
+    pointer-events: none; font-size: 18px;
+  }
+  .sku-list { list-style: none; }
+  .sku-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 8px; cursor: pointer;
+    background: #fff; transition: all 0.15s;
+  }
+  .sku-item:hover { background: var(--cream); border-color: var(--gold); }
+  .sku-item-left {}
+  .sku-item-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+  .sku-item-sku  { font-family: var(--ff-mono); font-size: 10px; color: var(--gold-dim); letter-spacing: 0.08em; }
+  .sku-item-stock {
+    font-family: var(--ff-mono); font-size: 11px;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .sku-item-stock.ok  { background: #e8f5e9; color: #2e7d32; }
+  .sku-item-stock.low { background: #fff3e0; color: #bf6000; }
+  .sku-item-stock.out { background: #ffebee; color: #c62828; }
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">✦</div>
+      <span class="brand-name">Jewellery Inventory</span>
+    </div>
+    <h1 class="page-title" id="page-title">Log Transaction</h1>
+  </header>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────
+// CONFIG — replace with your values after deploying Apps Script
+// ─────────────────────────────────────────────────────────────────────────
+const CONFIG = {
+  // Paste your Apps Script Web App URL here after deployment
+  API_URL: 'https://script.google.com/macros/s/AKfycbxQ6hu99wt3qeYhBqKDWp_Zn3EpqCCcen2634MNMBq-pSV_VJq63aslzOSqhxnDARLhnA/exec',
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────
+let state = {
+  product: null,
+  txnType: 'SOLD',
+  qty: 1,
+  updatedBy: '',
+  notes: '',
+  view: 'loading', // loading | search | form | success | error
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// ROUTER — read ?sku= param from URL
+// ─────────────────────────────────────────────────────────────────────────
+const params = new URLSearchParams(location.search);
+const SKU_PARAM = params.get('sku') || params.get('SKU') || params.get('s') || '';
+
+// ─────────────────────────────────────────────────────────────────────────
+// API CALLS
+// ─────────────────────────────────────────────────────────────────────────
+async function fetchProduct(sku) {
+  const res = await fetch(`${CONFIG.API_URL}?action=getProduct&sku=${encodeURIComponent(sku)}`);
+  if (!res.ok) throw new Error('Network error');
+  return res.json();
+}
+
+async function fetchAllProducts() {
+  const res = await fetch(`${CONFIG.API_URL}?action=getAllProducts`);
+  if (!res.ok) throw new Error('Network error');
+  return res.json();
+}
+
+async function postTransaction(payload) {
+  const res = await fetch(CONFIG.API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Network error');
+  return res.json();
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// RENDER HELPERS
+// ─────────────────────────────────────────────────────────────────────────
+function stockClass(stock, target) {
+  if (stock <= 0) return 'out';
+  if (stock <= target) return 'low';
+  return 'ok';
+}
+function stockLabel(stock, target) {
+  if (stock <= 0) return 'Out of stock';
+  if (stock <= target) return 'Low stock';
+  return 'In stock';
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// VIEWS
+// ─────────────────────────────────────────────────────────────────────────
+
+function renderLoading() {
+  document.getElementById('app').innerHTML = `
+    <div class="screen">
+      <div class="product-card">
+        <div class="skeleton" style="width:120px;height:12px;margin-bottom:10px"></div>
+        <div class="skeleton" style="width:200px;height:26px;margin-bottom:16px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="skeleton" style="height:40px"></div>
+          <div class="skeleton" style="height:40px"></div>
+          <div class="skeleton" style="height:40px"></div>
+        </div>
+      </div>
+      <div class="skeleton" style="height:52px;margin-bottom:20px"></div>
+      <div class="skeleton" style="height:56px;margin-bottom:20px"></div>
+    </div>`;
+}
+
+function renderForm(product) {
+  const sc = stockClass(product.currentStock, product.target);
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="screen">
+      <div class="product-card">
+        <div class="product-sku">${product.sku}</div>
+        <div class="product-name">${product.name}</div>
+        <div class="product-meta">
+          <div class="meta-item">
+            <div class="meta-label">Current stock</div>
+            <div class="meta-value stock-value ${sc}">${product.currentStock}</div>
+            <span class="stock-badge ${sc}">${stockLabel(product.currentStock, product.target)}</span>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Category</div>
+            <div class="meta-value">${product.subcategory}</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Metal</div>
+            <div class="meta-value">${product.metal}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="error-msg"></div>
+
+      <div class="form-section">
+        <label class="form-label">Transaction type</label>
+        <div class="type-toggle">
+          <button class="type-btn ${state.txnType==='SOLD'?'active-sold':''}" id="btn-sold" onclick="setType('SOLD')">Sold</button>
+          <button class="type-btn ${state.txnType==='ADDED'?'active-added':''}" id="btn-added" onclick="setType('ADDED')">Added</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Quantity</label>
+        <div class="qty-stepper">
+          <button class="qty-btn" onclick="adjustQty(-1)">−</button>
+          <input class="qty-input" id="qty-input" type="number" min="1" value="${state.qty}" oninput="state.qty=Math.max(1,parseInt(this.value)||1);this.value=state.qty">
+          <button class="qty-btn" onclick="adjustQty(1)">+</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Updated by</label>
+        <input class="text-input" id="updated-by" type="text" placeholder="Your name…"
+          value="${state.updatedBy}" oninput="state.updatedBy=this.value">
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Notes <span style="opacity:0.5">(optional)</span></label>
+        <textarea class="textarea-input" id="notes" placeholder="e.g. Restock from supplier…"
+          oninput="state.notes=this.value">${state.notes}</textarea>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitTransaction()">
+        Record Transaction
+      </button>
+    </div>`;
+}
+
+function renderSuccess(product, txnType, qty) {
+  const verb = txnType === 'SOLD' ? 'Sold' : 'Added';
+  const valClass = txnType === 'SOLD' ? 'sold-val' : 'added-val';
+  const newStock = txnType === 'SOLD'
+    ? product.currentStock - qty
+    : product.currentStock + qty;
+
+  document.getElementById('app').innerHTML = `
+    <div class="success-screen">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Logged</div>
+      <div class="success-sub">Transaction recorded successfully</div>
+      <div class="success-summary">
+        <div class="summary-row">
+          <span class="summary-key">Product</span>
+          <span class="summary-val">${product.name}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">Type</span>
+          <span class="summary-val ${valClass}">${verb}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">Quantity</span>
+          <span class="summary-val">${qty}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">New stock</span>
+          <span class="summary-val">${newStock} units</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">Logged by</span>
+          <span class="summary-val">${state.updatedBy || '—'}</span>
+        </div>
+      </div>
+      <button class="again-btn" onclick="resetForm()">Log another transaction</button>
+    </div>`;
+}
+
+function renderSearch(products) {
+  const app = document.getElementById('app');
+  document.getElementById('page-title').textContent = 'Select Product';
+  app.innerHTML = `
+    <div class="search-screen">
+      <p class="search-sub">No SKU scanned — search or tap a product below</p>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="search-input" type="text"
+          placeholder="Search by name or SKU…" oninput="filterProducts(this.value)">
+      </div>
+      <ul class="sku-list" id="sku-list">
+        ${renderSkuList(products)}
+      </ul>
+    </div>`;
+}
+
+function renderSkuList(products) {
+  return products.map(p => {
+    const sc = stockClass(p.currentStock, p.target);
+    return `<li class="sku-item" onclick="selectProduct('${p.sku}')">
+      <div class="sku-item-left">
+        <div class="sku-item-name">${p.name}</div>
+        <div class="sku-item-sku">${p.sku}</div>
+      </div>
+      <span class="sku-item-stock ${sc}">${p.currentStock} units</span>
+    </li>`;
+  }).join('');
+}
+
+let allProducts = [];
+function filterProducts(q) {
+  const filtered = q
+    ? allProducts.filter(p =>
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        p.sku.toLowerCase().includes(q.toLowerCase()))
+    : allProducts;
+  document.getElementById('sku-list').innerHTML = renderSkuList(filtered);
+}
+
+function selectProduct(sku) {
+  document.getElementById('page-title').textContent = 'Log Transaction';
+  state.product = allProducts.find(p => p.sku === sku);
+  renderForm(state.product);
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────────────────────────────────────
+function setType(type) {
+  state.txnType = type;
+  document.getElementById('btn-sold').className  = 'type-btn' + (type==='SOLD'  ? ' active-sold'  : '');
+  document.getElementById('btn-added').className = 'type-btn' + (type==='ADDED' ? ' active-added' : '');
+}
+
+function adjustQty(delta) {
+  state.qty = Math.max(1, state.qty + delta);
+  document.getElementById('qty-input').value = state.qty;
+}
+
+async function submitTransaction() {
+  const btn = document.getElementById('submit-btn');
+  const errEl = document.getElementById('error-msg');
+  errEl.classList.remove('visible');
+
+  state.updatedBy = document.getElementById('updated-by').value.trim();
+  state.notes = document.getElementById('notes').value.trim();
+  state.qty = parseInt(document.getElementById('qty-input').value) || 1;
+
+  if (!state.updatedBy) {
+    errEl.textContent = 'Please enter your name before submitting.';
+    errEl.classList.add('visible');
+    document.getElementById('updated-by').focus();
+    return;
+  }
+  if (state.txnType === 'SOLD' && state.qty > state.product.currentStock) {
+    errEl.textContent = `Cannot sell ${state.qty} — only ${state.product.currentStock} in stock.`;
+    errEl.classList.add('visible');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = '';
+
+  try {
+    const payload = {
+      action: 'addTransaction',
+      sku: state.product.sku,
+      productName: state.product.name,
+      type: state.txnType,
+      quantity: state.qty,
+      updatedBy: state.updatedBy,
+      notes: state.notes,
+    };
+    const result = await postTransaction(payload);
+    if (result.status !== 'ok') throw new Error(result.message || 'Unknown error');
+    renderSuccess(state.product, state.txnType, state.qty);
+  } catch (err) {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Record Transaction';
+    errEl.textContent = 'Failed to save. Check your connection and try again.';
+    errEl.classList.add('visible');
+  }
+}
+
+function resetForm() {
+  state.qty = 1;
+  state.notes = '';
+  document.getElementById('page-title').textContent = 'Log Transaction';
+  if (SKU_PARAM && state.product) {
+    renderForm(state.product);
+  } else {
+    renderSearch(allProducts);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────
+async function init() {
+  renderLoading();
+  try {
+    if (SKU_PARAM) {
+      const product = await fetchProduct(SKU_PARAM);
+      if (!product || product.error) {
+        document.getElementById('app').innerHTML = `
+          <div class="not-found">
+            <div class="not-found-icon">◇</div>
+            <div class="not-found-title">SKU not found</div>
+            <div class="not-found-sub">${SKU_PARAM}<br>Check the label and try again</div>
+          </div>`;
+        return;
+      }
+      state.product = product;
+      renderForm(product);
+    } else {
+      // No SKU param — show searchable product list
+      allProducts = await fetchAllProducts();
+      renderSearch(allProducts);
+    }
+  } catch (err) {
+    document.getElementById('app').innerHTML = `
+      <div class="not-found">
+        <div class="not-found-icon">⚠</div>
+        <div class="not-found-title">Could not load</div>
+        <div class="not-found-sub">Check your connection<br>or API configuration</div>
+      </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
