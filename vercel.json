@@ -1,0 +1,10 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "query", "key": "sku" }],
+      "destination": "https://shine-neon.vercel.app/?sku=:sku",
+      "permanent": false
+    }
+  ]
+}
